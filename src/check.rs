@@ -6,17 +6,17 @@ pub struct Output {
 	pub steps: Vec<String>
 }
 
-fn manage_resources(mut inventory: Inventory, process: &Process) -> Result <Inventory, String> {
+fn manage_resources<'a>(mut inventory: Inventory, process: &Process) -> Result <Inventory, &'a str> {
 	for resource_needed in &process.input {
 		match inventory.get(&resource_needed.name) {
 			Some (n_items) => {
 				if n_items < &resource_needed.quantity {
-					return Err ("Not enough available resources.".to_string())
+					return Err ("Not enough available resources.")
 				}
 				inventory.insert(resource_needed.name.clone(), n_items - resource_needed.quantity);
 			}
 			None => {
-				return Err ("Unexisting resource.".to_string())
+				return Err ("Unexisting resource.")
 			}
 		}
 	}
@@ -33,7 +33,7 @@ fn manage_resources(mut inventory: Inventory, process: &Process) -> Result <Inve
 	Ok (inventory)
 }
 
-pub fn check(simulation: Simulation, output: Output) -> Result <Inventory, String> {
+pub fn check<'a>(simulation: Simulation, output: Output) -> Result <Inventory, &'a str> {
 	let mut inventory = simulation.inventory.clone();
 	for step in output.steps {
 		match simulation.processes.get(&step) {
@@ -48,7 +48,7 @@ pub fn check(simulation: Simulation, output: Output) -> Result <Inventory, Strin
 				}
 			}
 			None => {
-				return Err ("Error, to lazy to find proper name".to_string())
+				return Err ("Error, to lazy to find proper name")
 			}
 		}
 	}

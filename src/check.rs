@@ -34,23 +34,22 @@ fn manage_resources<'a>(mut inventory: Inventory, process: &Process) -> Result <
 }
 
 pub fn check<'a>(simulation: Simulation, output: Output) -> Result <Inventory, &'a str> {
-	let mut inventory = simulation.inventory.clone();
-	for step in output.steps {
-		match simulation.processes.get(&step) {
-			Some (process) => {
-				match manage_resources(inventory, process) {
-					Ok (new_inventory) => {
-						inventory = new_inventory
-					}
-					Err (err) => {
-						return Err (err)
+	output.steps.iter()
+	.fold(Ok(simulation.inventory.clone()), |inventory_res, step| {
+		match inventory_res {
+			Err (err) => {
+				Err (err)
+			}
+			Ok (inventory) => {
+				match simulation.processes.get(step) {
+					Some (process) => {
+						manage_resources(inventory, process)
+					},
+					None => {
+						Err ("Error, to lazy to find proper name")
 					}
 				}
 			}
-			None => {
-				return Err ("Error, to lazy to find proper name")
-			}
 		}
-	}
-	Ok (inventory)
+	})
 }
